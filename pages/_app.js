@@ -1,5 +1,7 @@
 import "../styles/index.css";
 import "../public/fontawesome/css/all.min.css";
+import "react-quill/dist/quill.core.css";
+import "react-quill/dist/quill.snow.css";
 import App from "../components/App";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
