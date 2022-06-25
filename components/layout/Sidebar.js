@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import tw, { css } from "twin.macro";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 import DashboardIcon from "../../public/images/dashboard.png";
 
 const linkPathname = (router, link) => {
@@ -18,29 +19,35 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     storedSidebarExpanded === null ? true : storedSidebarExpanded === "true"
   );
 
+  const loggedUser = useSelector((state) => state.credentials.userLogin);
+
   const listMenu = [
     {
       link: "/home",
       icon: "fa fa-home",
       label: "Home",
+      roles: ["Teacher", "Student"],
       isActive: linkPathname,
     },
     {
       link: "/classroom",
       icon: "fa-solid fa-graduation-cap",
       label: "Data Kelas",
+      roles: ["Teacher"],
       isActive: linkPathname,
     },
     {
       link: "/teacher",
       icon: "fa-solid fa-chalkboard-user",
       label: "Daftar Guru",
+      roles: ["Teacher", "Student"],
       isActive: linkPathname,
     },
     {
       link: "/student",
       icon: "fa-solid fa-user",
       label: "Daftar Siswa",
+      roles: ["Teacher", "Student"],
       isActive: linkPathname,
     },
   ];
@@ -125,7 +132,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               </span>
             </h3>
 
-            <ul tw="mt-3">{menuRenderer({ subMenu: listMenu })}</ul>
+            <ul tw="mt-3">
+              {menuRenderer({ subMenu: listMenu, userRole: loggedUser.role })}
+            </ul>
           </div>
         </div>
 
@@ -152,35 +161,38 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-const menuRenderer = ({ subMenu }) => {
+const menuRenderer = ({ subMenu, userRole }) => {
   const router = useRouter();
   return subMenu.map((menu, i) => {
     let active = menu.isActive && menu.isActive(router, menu.link);
+    const filterRoles = menu.roles.filter((role) => role == userRole)[0];
     return (
-      <li
-        key={i}
-        tw="px-3 py-2 cursor-pointer rounded-sm mb-2 last:mb-0"
-        css={[active && tw`bg-blue-100 rounded-lg`]}
-      >
-        <Link href={menu.link}>
-          <div tw="block text-gray-200 hover:text-white truncate transition duration-150">
-            <div tw="flex items-center">
-              <i
-                className={menu.icon}
-                tw="flex-shrink-0 w-6 text-xl"
-                css={[active ? tw`text-blue-700` : tw`text-white`]}
-              ></i>
-              <span
-                className="lg:sidebar-expanded:opacity-100"
-                tw="text-sm font-medium ml-3 lg:opacity-0 2xl:opacity-100 duration-200"
-                css={[active ? tw`text-blue-700` : tw`text-white`]}
-              >
-                {menu.label}
-              </span>
+      filterRoles && (
+        <li
+          key={i}
+          tw="px-3 py-2 cursor-pointer rounded-sm mb-2 last:mb-0"
+          css={[active && tw`bg-blue-100 rounded-lg`]}
+        >
+          <Link href={menu.link}>
+            <div tw="block text-gray-200 hover:text-white truncate transition duration-150">
+              <div tw="flex items-center">
+                <i
+                  className={menu.icon}
+                  tw="flex-shrink-0 w-6 text-xl"
+                  css={[active ? tw`text-blue-700` : tw`text-white`]}
+                ></i>
+                <span
+                  className="lg:sidebar-expanded:opacity-100"
+                  tw="text-sm font-medium ml-3 lg:opacity-0 2xl:opacity-100 duration-200"
+                  css={[active ? tw`text-blue-700` : tw`text-white`]}
+                >
+                  {menu.label}
+                </span>
+              </div>
             </div>
-          </div>
-        </Link>
-      </li>
+          </Link>
+        </li>
+      )
     );
   });
 };

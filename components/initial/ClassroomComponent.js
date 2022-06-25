@@ -169,7 +169,7 @@ const StudentComponent = () => {
     []
   );
   return (
-    <LoggedArea>
+    <LoggedArea preventRole={"Student"}>
       <Layout header={{ title: "Data Siswa" }}>
         <div tw="py-10">
           <Table

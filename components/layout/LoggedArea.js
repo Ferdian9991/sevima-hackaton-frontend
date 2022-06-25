@@ -9,13 +9,18 @@ const getCookie = (name) => {
   else return null;
 };
 
-const LoggedArea = ({ children }) => {
+const LoggedArea = ({ children, preventRole }) => {
   const router = useRouter();
   const loggedUser = useSelector((state) => state.credentials.userLogin);
   const isLoggedInUser = isLoggedIn(loggedUser);
 
   if (isLoggedInUser) {
-    return <React.Fragment>{children}</React.Fragment>;
+    loggedUser.role === preventRole && router.replace("/home");
+    return (
+      <React.Fragment>
+        {loggedUser.role !== preventRole && children}
+      </React.Fragment>
+    );
   } else {
     router.replace("/login");
     return <React.Fragment></React.Fragment>;
