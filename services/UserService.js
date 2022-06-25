@@ -13,6 +13,10 @@ class UserServices extends BaseService {
     this.endPoint = "/update-user";
     return this.post(payload, option);
   }
+  delete(payload, option) {
+    this.endPoint = "/delete-user";
+    return this.post(payload, option);
+  }
 }
 
 export default new UserServices();

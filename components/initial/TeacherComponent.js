@@ -108,6 +108,38 @@ const TeacherComponent = () => {
     [formData]
   );
 
+  const handleDelete = useCallback(async ({ rows }) => {
+    try {
+      if (confirm(`Are you sure delete ${rows.length}`) == true) {
+        for (const row of rows) {
+          await UserService.delete(
+            {
+              id: row.id,
+            },
+            {
+              token: useCookie("token"),
+            }
+          );
+        }
+        getTeacher();
+        notification.showNotification({
+          message: `Successfully delete ${rows.length} device!`,
+          type: "success",
+          dismissTimeout: 3000,
+        });
+      }
+    } catch (e) {
+      hideLoadingSpinner();
+      e.data
+        ? notification.showNotification({
+            message: `${e.data.message}`,
+            type: "danger",
+            dismissTimeout: 3000,
+          })
+        : notification.handleError(e);
+    }
+  }, []);
+
   useEffect(() => {
     getTeacher();
   }, []);
@@ -150,7 +182,7 @@ const TeacherComponent = () => {
       <Layout header={{ title: "Data Guru" }}>
         <div tw="py-10">
           <Table
-            onRemove={() => {}}
+            onRemove={handleDelete}
             loading={loading}
             columns={columns}
             onEdit={({ row }) => {
