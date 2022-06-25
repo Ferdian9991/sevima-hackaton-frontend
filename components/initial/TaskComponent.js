@@ -509,37 +509,47 @@ const TaskComponent = () => {
                   </div>
                 </>
               )}
-              {!selectedAnswer.content &&
-                answerListData.map((list, i) => {
-                  return (
-                    <a
-                      key={i}
-                      onClick={() => {
-                        setSelectedAnswer(list);
-                      }}
-                      tw="hover:bg-gray-100 dark:hover:bg-shark-500 px-5 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-500 ease-in-out"
-                    >
-                      <img
-                        tw="h-12 w-12 rounded-full object-cover mt-3"
-                        src="/images/user.png"
-                        alt="username"
-                      />
-                      <div tw="w-full py-2">
-                        <div tw="flex justify-between">
-                          <span tw="block ml-4 font-semibold text-base text-gray-600 dark:text-mystic-500">
-                            {list.user[0].fullname}
-                          </span>
-                          <span tw="block ml-4 text-xl -mb-5 font-bold mt-1 text-gray-600 dark:text-mystic-500">
-                            <i className="fa-solid fa-user"></i>
+              {!selectedAnswer.content && (
+                <>
+                  {answerListData.length === 0 && (
+                    <div tw="h-full sticky top-0 left-0 bottom-0 right-0 grid grid-cols-1 content-center">
+                      <div tw="flex justify-center">
+                        <img src="images/empty.png" tw="w-[200px]" />
+                      </div>
+                    </div>
+                  )}
+                  {answerListData.map((list, i) => {
+                    return (
+                      <a
+                        key={i}
+                        onClick={() => {
+                          setSelectedAnswer(list);
+                        }}
+                        tw="hover:bg-gray-100 dark:hover:bg-shark-500 px-5 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-500 ease-in-out"
+                      >
+                        <img
+                          tw="h-12 w-12 rounded-full object-cover mt-3"
+                          src="/images/user.png"
+                          alt="username"
+                        />
+                        <div tw="w-full py-2">
+                          <div tw="flex justify-between">
+                            <span tw="block ml-4 font-semibold text-base text-gray-600 dark:text-mystic-500">
+                              {list.user[0].fullname}
+                            </span>
+                            <span tw="block ml-4 text-xl -mb-5 font-bold mt-1 text-gray-600 dark:text-mystic-500">
+                              <i className="fa-solid fa-user"></i>
+                            </span>
+                          </div>
+                          <span tw="block ml-4 text-gray-700 dark:text-mystic-500">
+                            {list.user[0]._id}
                           </span>
                         </div>
-                        <span tw="block ml-4 text-gray-700 dark:text-mystic-500">
-                          {list.user[0]._id}
-                        </span>
-                      </div>
-                    </a>
-                  );
-                })}
+                      </a>
+                    );
+                  })}
+                </>
+              )}
             </div>
           </Modal>
 
