@@ -32,13 +32,13 @@ const LogoutComponent = () => {
           });
         } catch (e) {
           notification.handleError(e);
-          router.push("/login");
+          router.push("/");
           hideLoadingSpinner();
         }
 
         return;
       }
-      router.push("/login");
+      router.push("/");
     })();
   }, []);
 
