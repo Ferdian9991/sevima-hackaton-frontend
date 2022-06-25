@@ -9,6 +9,10 @@ class AnswerTaskService extends BaseService {
     this.endPoint = "/add-answertask";
     return this.post(payload, option);
   }
+  getOneAnswerTask(payload, option) {
+    this.endPoint = "/get-oneAnswertask";
+    return this.post(payload, option);
+  }
 }
 
 export default new AnswerTaskService();

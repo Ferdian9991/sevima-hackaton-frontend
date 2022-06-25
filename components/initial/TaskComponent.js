@@ -31,16 +31,15 @@ const TaskComponent = () => {
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [answerContent, setAnswerContent] = useState({});
   const [classroomData, setClassroomData] = useState([]);
+  const [selectedAnswer, setSelectedAnswer] = useState({});
   const [answerTaskForm, setAnswerTaskForm] = useState({});
   const [answerListData, setAnswerListData] = useState([]);
   const [openAnswerLists, setOpenAnswerLists] = useState(false);
   const [selectedClassroomId, setSelectedClassroomId] = useState("");
 
-  console.log(answerListData);
-
   const isMobile = useMediaQuery({ maxWidth: 950 });
   const notification = useNotification();
-  const loggedUser = useSelector((state) => state.credentials.userLogin);
+  const userLogin = useSelector((state) => state.credentials.userLogin);
 
   const getClassroom = async () => {
     try {
@@ -96,6 +95,31 @@ const TaskComponent = () => {
         }
       );
       responseTask.data && setAnswerListData(responseTask.data.data);
+      setLoading(false);
+    } catch (e) {
+      e.data
+        ? notification.showNotification({
+            message: `${e.data.message}`,
+            type: "danger",
+            dismissTimeout: 3000,
+          })
+        : notification.handleError(e);
+    }
+  };
+
+  const getOneAnswerTask = async () => {
+    try {
+      setLoading(true);
+      const responseOneAnswer = await AnswerTaskService.getOneAnswerTask(
+        { taskId: answerContent.id },
+        {
+          token: useCookie("token"),
+        }
+      );
+      if (responseOneAnswer.data) {
+        const responseData = responseOneAnswer.data.data;
+        responseData != null && setAnswerTaskForm(responseData);
+      }
       setLoading(false);
     } catch (e) {
       e.data
@@ -178,7 +202,7 @@ const TaskComponent = () => {
         showLoadingSpinner();
         await AnswerTaskService.create(
           {
-            ...answerTaskForm,
+            content: answerTaskForm.content,
             taskId: answerContent.id,
           },
           {
@@ -192,7 +216,7 @@ const TaskComponent = () => {
           type: "success",
           dismissTimeout: 3000,
         });
-        getTask(loggedUser.classroomId);
+        getTask(userLogin.classroomId);
       } catch (e) {
         hideLoadingSpinner();
         e.data
@@ -204,7 +228,7 @@ const TaskComponent = () => {
           : notification.handleError(e);
       }
     },
-    [answerTaskForm, answerContent, loggedUser]
+    [answerTaskForm, answerContent, userLogin]
   );
 
   const handleDelete = useCallback(
@@ -244,9 +268,7 @@ const TaskComponent = () => {
 
   useEffect(() => {
     getClassroom();
-    loggedUser &&
-      loggedUser.role == "Student" &&
-      getTask(loggedUser.classroomId);
+    userLogin && userLogin.role == "Student" && getTask(userLogin.classroomId);
   }, []);
 
   useEffect(() => {
@@ -255,6 +277,10 @@ const TaskComponent = () => {
     !openTaskModal && setAnswerListData([]);
     !openTaskModal && setAnswerTaskForm({});
   }, [openTaskModal]);
+
+  useEffect(() => {
+    !openAnswerLists && setSelectedAnswer({});
+  }, [openAnswerLists]);
 
   useEffect(() => {
     if (selectedClassroomId) getTask(selectedClassroomId);
@@ -268,6 +294,10 @@ const TaskComponent = () => {
       setAnswerContent({});
     }
   }, [openAnswerLists]);
+
+  useEffect(() => {
+    if (Object.keys(answerContent).length != 0) getOneAnswerTask();
+  }, [answerContent]);
 
   const columns = useMemo(
     () => [
@@ -295,7 +325,7 @@ const TaskComponent = () => {
   );
 
   const modalTitle = () => {
-    if (loggedUser && loggedUser.role == "Teacher")
+    if (userLogin && userLogin.role == "Teacher")
       return !formData.id ? "Tambahkan tugas" : "Update tugas";
     else return "Kerjakan Tugas";
   };
@@ -304,7 +334,7 @@ const TaskComponent = () => {
     <LoggedArea>
       <Layout header={{ title: "Daftar Tugas" }}>
         <div tw="py-10">
-          {loggedUser && loggedUser.role == "Teacher" && (
+          {userLogin && userLogin.role == "Teacher" && (
             <div tw="w-[50%] sm:w-[30%] -mb-10">
               <label
                 htmlFor="password"
@@ -337,14 +367,14 @@ const TaskComponent = () => {
           )}
           <Table
             onRemove={
-              loggedUser != null && loggedUser.role === "Teacher"
+              userLogin != null && userLogin.role === "Teacher"
                 ? handleDelete
                 : false
             }
             loading={loading}
             columns={columns}
             onEdit={
-              loggedUser != null && loggedUser.role === "Teacher"
+              userLogin != null && userLogin.role === "Teacher"
                 ? ({ row }) => {
                     setFormData({
                       ...row,
@@ -354,7 +384,7 @@ const TaskComponent = () => {
                 : false
             }
             onAnswer={
-              loggedUser != null && loggedUser.role === "Student"
+              userLogin != null && userLogin.role === "Student"
                 ? ({ row }) => {
                     setAnswerContent({
                       ...row,
@@ -364,7 +394,7 @@ const TaskComponent = () => {
                 : false
             }
             onAnswerList={
-              loggedUser != null && loggedUser.role === "Teacher"
+              userLogin != null && userLogin.role === "Teacher"
                 ? ({ row }) => {
                     setAnswerContent({
                       ...row,
@@ -375,7 +405,7 @@ const TaskComponent = () => {
             }
             data={taskData}
             customTopButton={
-              loggedUser != null && loggedUser.role === "Teacher" ? (
+              userLogin != null && userLogin.role === "Teacher" ? (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -403,36 +433,66 @@ const TaskComponent = () => {
             customStyles={{
               "max-width": isMobile ? "28rem" : "38rem",
             }}
-            modalTitle={'Daftar siswa yang mengerjakan'}
+            modalTitle={"Daftar siswa yang mengerjakan"}
           >
-            <div tw="ml-2 mt-2 h-[300px]">
-              {answerListData.map((list, i) => {
-                return (
-                  <a
-                    key={i}
-                    tw="hover:bg-gray-100 dark:hover:bg-shark-500 px-5 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-500 ease-in-out"
-                  >
-                    <img
-                      tw="h-12 w-12 rounded-full object-cover mt-3"
-                      src="/images/user.png"
-                      alt="username"
-                    />
-                    <div tw="w-full py-2">
-                      <div tw="flex justify-between">
-                        <span tw="block ml-4 font-semibold text-base text-gray-600 dark:text-mystic-500">
-                          {list.user[0].fullname}
-                        </span>
-                        <span tw="block ml-4 text-xl -mb-5 font-bold mt-1 text-gray-600 dark:text-mystic-500">
-                          <i className="fa-solid fa-user"></i>
+            <div tw="px-2 mt-2 h-[330px]">
+              {selectedAnswer.content && (
+                <>
+                  <div tw="py-2 px-8 border-2 border-gray-300">
+                    {ReactHtmlParser(selectedAnswer.content)}
+                  </div>
+                  <div tw="mt-4">
+                    <div tw="w-44">
+                      <input
+                        type="text"
+                        name="text"
+                        value={formData.mapel || ""}
+                        onChange={(e) => {
+                          if (e) e.preventDefault();
+                          setFormData({
+                            ...formData,
+                            mapel: e.target.value,
+                          });
+                        }}
+                        tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                        placeholder="Nilai"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              {!selectedAnswer.content &&
+                answerListData.map((list, i) => {
+                  return (
+                    <a
+                      key={i}
+                      onClick={() => {
+                        setSelectedAnswer(list);
+                      }}
+                      tw="hover:bg-gray-100 dark:hover:bg-shark-500 px-5 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-500 ease-in-out"
+                    >
+                      <img
+                        tw="h-12 w-12 rounded-full object-cover mt-3"
+                        src="/images/user.png"
+                        alt="username"
+                      />
+                      <div tw="w-full py-2">
+                        <div tw="flex justify-between">
+                          <span tw="block ml-4 font-semibold text-base text-gray-600 dark:text-mystic-500">
+                            {list.user[0].fullname}
+                          </span>
+                          <span tw="block ml-4 text-xl -mb-5 font-bold mt-1 text-gray-600 dark:text-mystic-500">
+                            <i className="fa-solid fa-user"></i>
+                          </span>
+                        </div>
+                        <span tw="block ml-4 text-gray-700 dark:text-mystic-500">
+                          {list.user[0]._id}
                         </span>
                       </div>
-                      <span tw="block ml-4 text-gray-700 dark:text-mystic-500 w-[200px] truncate">
-                        {list.user[0]._id}
-                      </span>
-                    </div>
-                  </a>
-                );
-              })}
+                    </a>
+                  );
+                })}
             </div>
           </Modal>
 
@@ -448,14 +508,14 @@ const TaskComponent = () => {
             }}
             modalTitle={modalTitle()}
             onSubmit={(() => {
-              if (loggedUser && loggedUser.role === "Teacher") {
+              if (userLogin && userLogin.role === "Teacher") {
                 return !formData.id ? handleRegister : handleUpdate;
               }
               return handleSubmitAnswer;
             })()}
             formElement={() => (
               <>
-                {loggedUser.role === "Teacher" ? (
+                {userLogin.role === "Teacher" ? (
                   <>
                     <div>
                       <label
@@ -512,13 +572,13 @@ const TaskComponent = () => {
                     htmlFor="text"
                     tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                   >
-                    {loggedUser === "Teacher"
+                    {userLogin === "Teacher"
                       ? "Konten Tugas"
                       : "Kerjakan Tugas"}
                   </label>
                   <ReactQuill
                     onChange={(value) => {
-                      if (loggedUser && loggedUser.role == "Teacher") {
+                      if (userLogin && userLogin.role == "Teacher") {
                         setFormData({
                           ...formData,
                           content: value,
@@ -530,7 +590,7 @@ const TaskComponent = () => {
                       });
                     }}
                     value={(() => {
-                      if (loggedUser && loggedUser.role == "Teacher") {
+                      if (userLogin && userLogin.role == "Teacher") {
                         return formData.content || "";
                       }
                       return answerTaskForm.content || "";
@@ -542,7 +602,7 @@ const TaskComponent = () => {
                   tw="w-full text-white bg-cornflower-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
                   {(() => {
-                    if (loggedUser && loggedUser.role == "Teacher") {
+                    if (userLogin && userLogin.role == "Teacher") {
                       return !formData.id ? "Tambah Tugas" : "Update Tugas";
                     }
                     return "Update Jawaban";
