@@ -233,7 +233,7 @@ const StudentComponent = () => {
           <Modal
             modalOpen={openStudentModal}
             setModalOpen={setOpenStudentModal}
-            modalTitle={!formData.id ? "Tambahkan guru" : "Update Siswa"}
+            modalTitle={!formData.id ? "Tambahkan Siswa" : "Update Siswa"}
             onSubmit={!formData.id ? handleRegister : handleUpdate}
             formElement={() => (
               <>
@@ -353,6 +353,29 @@ const StudentComponent = () => {
                     <option value="laki-laki">Laki-laki</option>
                     <option value="perempuan">Perempuan</option>
                   </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    Kode Kelas
+                  </label>
+                  <input
+                    type="text"
+                    name="classCode"
+                    value={formData.classCode || ""}
+                    onChange={(e) => {
+                      if (e) e.preventDefault();
+                      setFormData({
+                        ...formData,
+                        classCode: e.target.value,
+                      });
+                    }}
+                    tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    placeholder="Kode Kelas"
+                    required
+                  />
                 </div>
                 {!formData.id && (
                   <>
