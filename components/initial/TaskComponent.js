@@ -13,6 +13,7 @@ import { useCookie } from "../layout/LoggedArea";
 import Modal from "../utilities/Modal";
 import TaskService from "../../services/TaskService";
 import ClassroomService from "../../services/ClassroomService";
+import AnswerTaskService from "../../services/AnswerTaskService";
 import {
   showLoadingSpinner,
   hideLoadingSpinner,
@@ -28,9 +29,14 @@ const TaskComponent = () => {
   const [formData, setFormData] = useState({});
   const [taskData, setTaskData] = useState([]);
   const [openTaskModal, setOpenTaskModal] = useState(false);
+  const [answerContent, setAnswerContent] = useState({});
   const [classroomData, setClassroomData] = useState([]);
   const [answerTaskForm, setAnswerTaskForm] = useState({});
+  const [answerListData, setAnswerListData] = useState([]);
+  const [openAnswerLists, setOpenAnswerLists] = useState(false);
   const [selectedClassroomId, setSelectedClassroomId] = useState("");
+
+  console.log(answerListData);
 
   const isMobile = useMediaQuery({ maxWidth: 950 });
   const notification = useNotification();
@@ -68,6 +74,28 @@ const TaskComponent = () => {
         }
       );
       responseTask.data && setTaskData(responseTask.data.data);
+      setLoading(false);
+    } catch (e) {
+      e.data
+        ? notification.showNotification({
+            message: `${e.data.message}`,
+            type: "danger",
+            dismissTimeout: 3000,
+          })
+        : notification.handleError(e);
+    }
+  };
+
+  const getAnswerTask = async () => {
+    try {
+      setLoading(true);
+      const responseTask = await AnswerTaskService.getAnswerTask(
+        { taskId: answerContent.id },
+        {
+          token: useCookie("token"),
+        }
+      );
+      responseTask.data && setAnswerListData(responseTask.data.data);
       setLoading(false);
     } catch (e) {
       e.data
@@ -143,6 +171,42 @@ const TaskComponent = () => {
     [formData, selectedClassroomId]
   );
 
+  const handleSubmitAnswer = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+      try {
+        showLoadingSpinner();
+        await AnswerTaskService.create(
+          {
+            ...answerTaskForm,
+            taskId: answerContent.id,
+          },
+          {
+            token: useCookie("token"),
+          }
+        );
+        setOpenTaskModal(false);
+        hideLoadingSpinner();
+        notification.showNotification({
+          message: `Successfully answer task!`,
+          type: "success",
+          dismissTimeout: 3000,
+        });
+        getTask(loggedUser.classroomId);
+      } catch (e) {
+        hideLoadingSpinner();
+        e.data
+          ? notification.showNotification({
+              message: `${e.data.message}`,
+              type: "danger",
+              dismissTimeout: 3000,
+            })
+          : notification.handleError(e);
+      }
+    },
+    [answerTaskForm, answerContent, loggedUser]
+  );
+
   const handleDelete = useCallback(
     async ({ rows }) => {
       try {
@@ -187,12 +251,23 @@ const TaskComponent = () => {
 
   useEffect(() => {
     !openTaskModal && setFormData({});
+    !openTaskModal && setAnswerContent({});
+    !openTaskModal && setAnswerListData([]);
+    !openTaskModal && setAnswerTaskForm({});
   }, [openTaskModal]);
 
   useEffect(() => {
     if (selectedClassroomId) getTask(selectedClassroomId);
     else setTaskData([]);
   }, [selectedClassroomId]);
+
+  useEffect(() => {
+    if (openAnswerLists) {
+      getAnswerTask();
+    } else {
+      setAnswerContent({});
+    }
+  }, [openAnswerLists]);
 
   const columns = useMemo(
     () => [
@@ -281,10 +356,20 @@ const TaskComponent = () => {
             onAnswer={
               loggedUser != null && loggedUser.role === "Student"
                 ? ({ row }) => {
-                    setAnswerTaskForm({
+                    setAnswerContent({
                       ...row,
                     });
                     setOpenTaskModal(true);
+                  }
+                : false
+            }
+            onAnswerList={
+              loggedUser != null && loggedUser.role === "Teacher"
+                ? ({ row }) => {
+                    setAnswerContent({
+                      ...row,
+                    });
+                    setOpenAnswerLists(true);
                   }
                 : false
             }
@@ -309,6 +394,49 @@ const TaskComponent = () => {
           />
 
           {/**
+           * Answer Lists Modal
+           */}
+
+          <Modal
+            modalOpen={openAnswerLists}
+            setModalOpen={setOpenAnswerLists}
+            customStyles={{
+              "max-width": isMobile ? "28rem" : "38rem",
+            }}
+            modalTitle={'Daftar siswa yang mengerjakan'}
+          >
+            <div tw="ml-2 mt-2 h-[300px]">
+              {answerListData.map((list, i) => {
+                return (
+                  <a
+                    key={i}
+                    tw="hover:bg-gray-100 dark:hover:bg-shark-500 px-5 py-2 cursor-pointer flex items-center text-sm focus:outline-none focus:border-gray-300 transition duration-500 ease-in-out"
+                  >
+                    <img
+                      tw="h-12 w-12 rounded-full object-cover mt-3"
+                      src="/images/user.png"
+                      alt="username"
+                    />
+                    <div tw="w-full py-2">
+                      <div tw="flex justify-between">
+                        <span tw="block ml-4 font-semibold text-base text-gray-600 dark:text-mystic-500">
+                          {list.user[0].fullname}
+                        </span>
+                        <span tw="block ml-4 text-xl -mb-5 font-bold mt-1 text-gray-600 dark:text-mystic-500">
+                          <i className="fa-solid fa-user"></i>
+                        </span>
+                      </div>
+                      <span tw="block ml-4 text-gray-700 dark:text-mystic-500 w-[200px] truncate">
+                        {list.user[0]._id}
+                      </span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </Modal>
+
+          {/**
            * CRUD Modal
            */}
 
@@ -319,7 +447,12 @@ const TaskComponent = () => {
               "max-width": isMobile ? "28rem" : "38rem",
             }}
             modalTitle={modalTitle()}
-            onSubmit={!formData.id ? handleRegister : handleUpdate}
+            onSubmit={(() => {
+              if (loggedUser && loggedUser.role === "Teacher") {
+                return !formData.id ? handleRegister : handleUpdate;
+              }
+              return handleSubmitAnswer;
+            })()}
             formElement={() => (
               <>
                 {loggedUser.role === "Teacher" ? (
@@ -372,7 +505,7 @@ const TaskComponent = () => {
                     </div>
                   </>
                 ) : (
-                  <div>{ReactHtmlParser(answerTaskForm.content)}</div>
+                  <div>{ReactHtmlParser(answerContent.content)}</div>
                 )}
                 <div>
                   <label
@@ -385,19 +518,35 @@ const TaskComponent = () => {
                   </label>
                   <ReactQuill
                     onChange={(value) => {
-                      setFormData({
-                        ...formData,
+                      if (loggedUser && loggedUser.role == "Teacher") {
+                        setFormData({
+                          ...formData,
+                          content: value,
+                        });
+                      }
+                      setAnswerTaskForm({
+                        answerTaskForm,
                         content: value,
                       });
                     }}
-                    value={formData.content || ""}
+                    value={(() => {
+                      if (loggedUser && loggedUser.role == "Teacher") {
+                        return formData.content || "";
+                      }
+                      return answerTaskForm.content || "";
+                    })()}
                   />
                 </div>
                 <button
                   type="submit"
                   tw="w-full text-white bg-cornflower-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
-                  {!formData.id ? "Tambah Tugas" : "Update Tugas"}
+                  {(() => {
+                    if (loggedUser && loggedUser.role == "Teacher") {
+                      return !formData.id ? "Tambah Tugas" : "Update Tugas";
+                    }
+                    return "Update Jawaban";
+                  })()}
                 </button>
               </>
             )}

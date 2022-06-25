@@ -79,6 +79,7 @@ const Modal = ({
                       {formElement()}
                     </form>
                   )}
+                  {children}
                 </div>
               </div>
             </div>

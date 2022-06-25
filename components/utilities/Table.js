@@ -21,6 +21,7 @@ const Table = ({
   onAdd,
   onEdit,
   onAnswer,
+  onAnswerList,
   onRemove,
   customAddButton,
   permanentDelete,
@@ -131,6 +132,7 @@ const Table = ({
         if (
           onEdit ||
           onAnswer ||
+          onAnswerList ||
           customUtilities ||
           onGenerate ||
           onAddParticipant
@@ -147,6 +149,7 @@ const Table = ({
                   row={row}
                   onEdit={onEdit}
                   onAnswer={onAnswer}
+                  onAnswerList={onAnswerList}
                   onAddParticipant={onAddParticipant}
                   onGenerate={onGenerate}
                   customUtilities={customUtilities || []}
@@ -597,6 +600,21 @@ const IndeterminateOptions = (props) => {
           tw="mb-1 bg-green-500 hover:bg-green-600 w-[100px] mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
         >
           <i className="fa-brands fa-readme" tw="text-white" /> Kerjakan
+        </button>
+      ) : null}
+      {props.onAnswerList ? (
+        <button
+          onClick={(e) => {
+            if (e) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+            props.onAnswerList({ row: props.row.original });
+            setOptionsVisible(false);
+          }}
+          tw="mb-1 bg-green-500 hover:bg-green-600 w-[100px] mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
+        >
+          <i className="fa-solid fa-list-check" tw="text-white" /> Jawaban
         </button>
       ) : null}
       {props.onGenerate ? (
