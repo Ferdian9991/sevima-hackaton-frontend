@@ -435,29 +435,76 @@ const TaskComponent = () => {
             }}
             modalTitle={"Daftar siswa yang mengerjakan"}
           >
-            <div tw="px-2 mt-2 h-[330px]">
+            <div tw="px-5 mt-2 h-[330px]">
               {selectedAnswer.content && (
                 <>
                   <div tw="py-2 px-8 border-2 border-gray-300">
                     {ReactHtmlParser(selectedAnswer.content)}
                   </div>
-                  <div tw="mt-4">
-                    <div tw="w-44">
+                  <div tw="mt-4 flex">
+                    <div tw="w-44 flex-col">
                       <input
-                        type="text"
-                        name="text"
-                        value={formData.mapel || ""}
+                        type="number"
+                        name="score"
+                        value={selectedAnswer.score || ""}
                         onChange={(e) => {
                           if (e) e.preventDefault();
-                          setFormData({
-                            ...formData,
-                            mapel: e.target.value,
+                          setSelectedAnswer({
+                            ...selectedAnswer,
+                            score: e.target.value,
                           });
                         }}
                         tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                         placeholder="Nilai"
                         required
                       />
+                    </div>
+                    <div tw="flex-col w-[100px] ml-3">
+                      <button
+                        onClick={async (e) => {
+                          if (e) e.preventDefault();
+                          try {
+                            await AnswerTaskService.update(
+                              {
+                                score: selectedAnswer.score,
+                                id: selectedAnswer._id,
+                              },
+                              {
+                                token: useCookie("token"),
+                              }
+                            );
+                            notification.showNotification({
+                              message: `Successfully update score`,
+                              type: "success",
+                              dismissTimeout: 3000,
+                            });
+                            setOpenAnswerLists(false);
+                          } catch (e) {
+                            e.data
+                              ? notification.showNotification({
+                                  message: `${e.data.message}`,
+                                  type: "danger",
+                                  dismissTimeout: 3000,
+                                })
+                              : notification.handleError(e);
+                          }
+                        }}
+                        type="submit"
+                        tw="w-full text-white bg-cornflower-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Beri Nilai
+                      </button>
+                    </div>
+                    <div tw="flex-col w-[100px] ml-2">
+                      <button
+                        onClick={(e) => {
+                          if (e) e.preventDefault();
+                          setSelectedAnswer({});
+                        }}
+                        tw="w-full text-white bg-red-500 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Close
+                      </button>
                     </div>
                   </div>
                 </>
