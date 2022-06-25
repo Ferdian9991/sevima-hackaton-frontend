@@ -191,6 +191,7 @@ const TaskComponent = () => {
 
   useEffect(() => {
     if (selectedClassroomId) getTask(selectedClassroomId);
+    else setTaskData([]);
   }, [selectedClassroomId]);
 
   const columns = useMemo(
@@ -239,7 +240,10 @@ const TaskComponent = () => {
               <select
                 required
                 onChange={(e) => {
-                  if (e.target.value) setSelectedClassroomId(e.target.value);
+                  if (e.target.value)
+                    setSelectedClassroomId(
+                      e.target.value != "null" ? e.target.value : ""
+                    );
                 }}
                 tw="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
                           focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
@@ -294,7 +298,7 @@ const TaskComponent = () => {
                     setOpenTaskModal(true);
                   }}
                   className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
-                  disabled={!Boolean(selectedClassroomId)}
+                  disabled={!Boolean(selectedClassroomId) ? true : false}
                 >
                   <i className="fa fa-plus"></i>
                 </button>
