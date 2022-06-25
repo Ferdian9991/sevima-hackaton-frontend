@@ -29,7 +29,7 @@ const Layout = ({ children, header }) => {
             title={header.title}
           />
           <main tw="bg-alabaster-500">
-            <div tw="h-screen px-4 sm:px-6 lg:px-8 w-full max-w-9xl mx-auto">
+            <div tw="h-screen px-4 sm:px-6 lg:px-8 w-full max-w-9xl mx-auto relative">
               {children}
             </div>
           </main>

@@ -11,6 +11,7 @@ import Table from "../utilities/Table";
 import { useCookie } from "../layout/LoggedArea";
 import Modal from "../utilities/Modal";
 import TaskService from "../../services/TaskService";
+import ClassroomService from "../../services/ClassroomService";
 import {
   showLoadingSpinner,
   hideLoadingSpinner,
@@ -26,18 +27,45 @@ const TaskComponent = () => {
   const [formData, setFormData] = useState({});
   const [taskData, setTaskData] = useState([]);
   const [openTaskModal, setOpenTaskModal] = useState(false);
+  const [classroomData, setClassroomData] = useState([]);
+  const [selectedClassroomId, setSelectedClassroomId] = useState("");
 
   const isMobile = useMediaQuery({ maxWidth: 950 });
   const notification = useNotification();
   const loggedUser = useSelector((state) => state.credentials.userLogin);
 
-  const getTask = async () => {
+  const getClassroom = async () => {
     try {
       setLoading(true);
-      const response = await TaskService.getTask({
+      const responseClassroom = await ClassroomService.getClassroom({
         token: useCookie("token"),
       });
-      response.data && setTaskData(response.data.data);
+      if (responseClassroom.data) {
+        const data = responseClassroom.data.data;
+        setClassroomData(data);
+      }
+      setLoading(false);
+    } catch (e) {
+      e.data
+        ? notification.showNotification({
+            message: `${e.data.message}`,
+            type: "danger",
+            dismissTimeout: 3000,
+          })
+        : notification.handleError(e);
+    }
+  };
+
+  const getTask = async (classroomId) => {
+    try {
+      setLoading(true);
+      const responseTask = await TaskService.getTask(
+        { classroomId },
+        {
+          token: useCookie("token"),
+        }
+      );
+      responseTask.data && setTaskData(responseTask.data.data);
       setLoading(false);
     } catch (e) {
       e.data
@@ -55,9 +83,12 @@ const TaskComponent = () => {
       if (e) e.preventDefault();
       try {
         showLoadingSpinner();
-        const response = await TaskService.register(formData, {
-          token: useCookie("token"),
-        });
+        const response = await TaskService.register(
+          { ...formData, classroomId: selectedClassroomId },
+          {
+            token: useCookie("token"),
+          }
+        );
         hideLoadingSpinner();
         notification.showNotification({
           message: `${response.data.message}`,
@@ -65,7 +96,7 @@ const TaskComponent = () => {
           dismissTimeout: 3000,
         });
         setOpenTaskModal(false);
-        getTask();
+        getTask(selectedClassroomId);
       } catch (e) {
         hideLoadingSpinner();
         e.data
@@ -95,7 +126,7 @@ const TaskComponent = () => {
           type: "success",
           dismissTimeout: 3000,
         });
-        getTask();
+        getTask(selectedClassroomId);
       } catch (e) {
         hideLoadingSpinner();
         e.data
@@ -107,48 +138,55 @@ const TaskComponent = () => {
           : notification.handleError(e);
       }
     },
-    [formData]
+    [formData, selectedClassroomId]
   );
 
-  const handleDelete = useCallback(async ({ rows }) => {
-    try {
-      if (confirm(`Are you sure delete ${rows.length}`) == true) {
-        for (const row of rows) {
-          await TaskService.delete(
-            {
-              id: row.id,
-            },
-            {
-              token: useCookie("token"),
-            }
-          );
-        }
-        getTask();
-        notification.showNotification({
-          message: `Successfully delete ${rows.length} device!`,
-          type: "success",
-          dismissTimeout: 3000,
-        });
-      }
-    } catch (e) {
-      hideLoadingSpinner();
-      e.data
-        ? notification.showNotification({
-            message: `${e.data.message}`,
-            type: "danger",
+  const handleDelete = useCallback(
+    async ({ rows }) => {
+      try {
+        if (confirm(`Are you sure delete ${rows.length}`) == true) {
+          for (const row of rows) {
+            await TaskService.delete(
+              {
+                id: row.id,
+              },
+              {
+                token: useCookie("token"),
+              }
+            );
+          }
+          getTask(selectedClassroomId);
+          notification.showNotification({
+            message: `Successfully delete ${rows.length} task!`,
+            type: "success",
             dismissTimeout: 3000,
-          })
-        : notification.handleError(e);
-    }
-  }, []);
+          });
+        }
+      } catch (e) {
+        hideLoadingSpinner();
+        e.data
+          ? notification.showNotification({
+              message: `${e.data.message}`,
+              type: "danger",
+              dismissTimeout: 3000,
+            })
+          : notification.handleError(e);
+      }
+    },
+    [selectedClassroomId]
+  );
 
   useEffect(() => {
-    getTask();
+    getClassroom();
   }, []);
 
   useEffect(() => {
     !openTaskModal && setFormData({});
   }, [openTaskModal]);
+
+  useEffect(() => {
+    if (selectedClassroomId) getTask(selectedClassroomId);
+  }, [selectedClassroomId]);
 
   const columns = useMemo(
     () => [
@@ -159,10 +197,6 @@ const TaskComponent = () => {
       {
         Header: "Mata Pelajaran",
         accessor: "mapel",
-      },
-      {
-        Header: "ID Kelas",
-        accessor: "classroomId",
       },
       {
         Header: "Tanggal Dibuat",
@@ -182,6 +216,32 @@ const TaskComponent = () => {
     <LoggedArea>
       <Layout header={{ title: "Daftar Tugas" }}>
         <div tw="py-10">
+          <div tw="w-[50%] sm:w-[30%] -mb-10">
+            <label
+              htmlFor="password"
+              tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+            >
+              Pilih Kelas
+            </label>
+            <select
+              required
+              onChange={(e) => {
+                if (e.target.value) setSelectedClassroomId(e.target.value);
+              }}
+              tw="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                          focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                          focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            >
+              <option value="null">Pilih Kelas Dulu</option>
+              {classroomData.map((classroom, i) => {
+                return (
+                  <option value={classroom.id} key={i}>
+                    {classroom.name}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
           <Table
             onRemove={
               loggedUser != null && loggedUser.role === "Teacher"
