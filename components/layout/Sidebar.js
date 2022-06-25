@@ -39,7 +39,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     {
       link: "/task",
       icon: "fa-solid fa-book",
-      label: "Daftar Tugas",
+      label: "Daftar Tugas / Materi",
       roles: ["Teacher", "Student"],
       isActive: linkPathname,
     },
