@@ -22,7 +22,7 @@ const LoggedArea = ({ children, preventRole }) => {
       </React.Fragment>
     );
   } else {
-    router.replace("/login");
+    router.replace("/");
     return <React.Fragment></React.Fragment>;
   }
 };

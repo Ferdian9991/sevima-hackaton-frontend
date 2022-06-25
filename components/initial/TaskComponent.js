@@ -28,6 +28,7 @@ const TaskComponent = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
   const [taskData, setTaskData] = useState([]);
+  const [taskScore, setTaskScore] = useState("Belum Dinilai");
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [answerContent, setAnswerContent] = useState({});
   const [classroomData, setClassroomData] = useState([]);
@@ -118,7 +119,12 @@ const TaskComponent = () => {
       );
       if (responseOneAnswer.data) {
         const responseData = responseOneAnswer.data.data;
-        responseData != null && setAnswerTaskForm(responseData);
+        if (responseData != null) {
+          setAnswerTaskForm(responseData);
+          setTaskScore(
+            responseData.score == "" ? "Belum Dinilai" : responseData.score
+          );
+        }
       }
       setLoading(false);
     } catch (e) {
@@ -273,6 +279,7 @@ const TaskComponent = () => {
 
   useEffect(() => {
     !openTaskModal && setFormData({});
+    !openTaskModal && setTaskScore("Belum Dinilai");
     !openTaskModal && setAnswerContent({});
     !openTaskModal && setAnswerListData([]);
     !openTaskModal && setAnswerTaskForm({});
@@ -329,7 +336,7 @@ const TaskComponent = () => {
       return !formData.id ? "Tambahkan tugas" : "Update tugas";
     else return "Kerjakan Tugas";
   };
-
+  console.log(answerTaskForm);
   return (
     <LoggedArea>
       <Layout header={{ title: "Daftar Tugas" }}>
@@ -622,7 +629,12 @@ const TaskComponent = () => {
                     </div>
                   </>
                 ) : (
-                  <div>{ReactHtmlParser(answerContent.content)}</div>
+                  <div>
+                    <div tw="text-lg">
+                      <span tw="font-bold">Nilai:</span> {taskScore}
+                    </div>
+                    {ReactHtmlParser(answerContent.content)}
+                  </div>
                 )}
                 <div>
                   <label
@@ -642,7 +654,7 @@ const TaskComponent = () => {
                         });
                       }
                       setAnswerTaskForm({
-                        answerTaskForm,
+                        ...answerTaskForm,
                         content: value,
                       });
                     }}
