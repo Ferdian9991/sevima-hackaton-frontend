@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import tw from "twin.macro";
-import PasswordStrengthBar from "react-password-strength-bar";
+import moment from "moment";
+import "moment/locale/id";
 import { useSelector } from "react-redux";
 import LoggedArea from "../layout/LoggedArea";
 import Layout from "../layout/Layout";
@@ -20,7 +21,6 @@ const StudentComponent = () => {
   const [customCode, setCustomCode] = useState(false);
   const [classroomData, setTeacherData] = useState([]);
   const [openClassroomModal, setOpenClassroomModal] = useState(false);
-  const [passwordVisibility, setPasswordVisibility] = useState(false);
 
   const notification = useNotification();
   const loggedUser = useSelector((state) => state.credentials.userLogin);
@@ -43,12 +43,6 @@ const StudentComponent = () => {
         : notification.handleError(e);
     }
   };
-
-  const handleShowPassword = useCallback(() => {
-    !passwordVisibility
-      ? setPasswordVisibility(true)
-      : setPasswordVisibility(false);
-  }, [passwordVisibility]);
 
   const handleRegister = useCallback(
     async (e) => {
@@ -156,6 +150,21 @@ const StudentComponent = () => {
         Header: "Nama Kelas",
         accessor: "name",
       },
+      {
+        Header: "Kode Kelas",
+        accessor: "classCode",
+      },
+      {
+        Header: "Tanggal Dibuat",
+        accessor: "_createdAt",
+        Cell: (props) => {
+          return (
+            <div>
+              <p>{moment(props.cell.row.original).format("LL")}</p>
+            </div>
+          );
+        },
+      },
     ],
     []
   );
@@ -245,16 +254,16 @@ const StudentComponent = () => {
                     <input
                       type="text"
                       name="text"
-                      value={formData.code || ""}
+                      value={formData.classCode || ""}
                       onChange={(e) => {
                         if (e) e.preventDefault();
                         setFormData({
                           ...formData,
-                          code: e.target.value,
+                          classCode: e.target.value,
                         });
                       }}
                       tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                      placeholder="Username"
+                      placeholder="Kode Kelas"
                       required
                     />
                   </div>
