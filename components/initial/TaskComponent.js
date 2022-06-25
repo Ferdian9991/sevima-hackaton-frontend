@@ -180,7 +180,9 @@ const TaskComponent = () => {
 
   useEffect(() => {
     getClassroom();
-    loggedUser.role == "Student" && getTask(loggedUser.classroomId);
+    loggedUser &&
+      loggedUser.role == "Student" &&
+      getTask(loggedUser.classroomId);
   }, []);
 
   useEffect(() => {
@@ -217,7 +219,7 @@ const TaskComponent = () => {
   );
 
   const modalTitle = () => {
-    if (loggedUser.role == "Teacher")
+    if (loggedUser && loggedUser.role == "Teacher")
       return !formData.id ? "Tambahkan tugas" : "Update tugas";
     else return "Kerjakan Tugas";
   };
@@ -226,7 +228,7 @@ const TaskComponent = () => {
     <LoggedArea>
       <Layout header={{ title: "Daftar Tugas" }}>
         <div tw="py-10">
-          {loggedUser.role == "Teacher" && (
+          {loggedUser && loggedUser.role == "Teacher" && (
             <div tw="w-[50%] sm:w-[30%] -mb-10">
               <label
                 htmlFor="password"

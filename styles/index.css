@@ -17,6 +17,10 @@
   border-radius: 40px;
 }
 
+.ql-tooltip.ql-editing {
+  left: 0px !important
+}
+
 .loader-wrapper {
   -webkit-transition: visibility 0s linear 200ms, opacity 200ms linear; /* Safari */
   transition: visibility 0s linear 200ms, opacity 200ms linear;
