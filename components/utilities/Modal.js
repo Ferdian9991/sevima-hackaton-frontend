@@ -4,6 +4,7 @@ import Transition from "./Transition";
 
 const Modal = ({
   children,
+  customStyles,
   modalOpen,
   setModalOpen,
   formElement,
@@ -39,7 +40,10 @@ const Modal = ({
         css={{ backgroundColor: "#ffffff78" }}
       >
         {modalOpen && (
-          <div tw="relative block mx-auto p-4 w-full max-w-md top-20 h-full md:h-auto">
+          <div
+            tw="relative block mx-auto p-4 w-full max-w-md top-20 h-full md:h-auto"
+            css={customStyles && customStyles}
+          >
             <div tw="relative bg-white rounded-lg shadow">
               <button
                 type="button"

@@ -24,7 +24,7 @@ const nextConfig = withBundleAnalyzer({
   compilerOptions: {
     jsxImportSource: "preact",
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
 });
 
 module.exports = nextConfig;

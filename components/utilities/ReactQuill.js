@@ -1,4 +1,5 @@
 import React from "react";
+import tw, { css } from "twin.macro";
 import ReactQuill, { Quill } from "react-quill";
 import MarkdownShortcuts from "quill-markdown-shortcuts";
 
@@ -40,7 +41,7 @@ const formats = [
 const ReactQuillEditor = ({ onChange, value }) => {
   return (
     <ReactQuill
-      style={{ width: "75%" }}
+      css={{ width: "100%" }}
       theme="snow"
       value={value}
       formats={formats}

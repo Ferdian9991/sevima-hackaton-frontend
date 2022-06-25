@@ -37,6 +37,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       isActive: linkPathname,
     },
     {
+      link: "/task",
+      icon: "fa-solid fa-book",
+      label: "Daftar Tugas",
+      roles: ["Teacher", "Student"],
+      isActive: linkPathname,
+    },
+    {
       link: "/teacher",
       icon: "fa-solid fa-chalkboard-user",
       label: "Daftar Guru",
