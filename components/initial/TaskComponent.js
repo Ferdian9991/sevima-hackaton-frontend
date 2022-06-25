@@ -270,6 +270,7 @@ const TaskComponent = () => {
                     setOpenTaskModal(true);
                   }}
                   className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
+                  disabled={!Boolean(selectedClassroomId)}
                 >
                   <i className="fa fa-plus"></i>
                 </button>

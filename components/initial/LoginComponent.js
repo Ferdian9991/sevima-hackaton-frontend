@@ -17,8 +17,9 @@ import Modal from "../utilities/Modal";
 
 const login = () => {
   const [loginForm, setLoginForm] = useState({});
-  const [registerForm, setRegisterForm] = useState({});
+  const [isStudent, setIsStudent] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
+  const [registerForm, setRegisterForm] = useState({});
   const [passwordVisibility, setPasswordVisibility] = useState(false);
 
   const router = useRouter();
@@ -54,7 +55,10 @@ const login = () => {
       if (e) e.preventDefault();
       try {
         showLoadingSpinner();
-        const response = await AuthService.register(registerForm);
+        const response = await AuthService.register({
+          ...registerForm,
+          role: isStudent ? "Student" : "Teacher",
+        });
         hideLoadingSpinner();
         notification.showNotification({
           message: `${response.data.message}`,
@@ -73,7 +77,7 @@ const login = () => {
           : notification.handleError(e);
       }
     },
-    [registerForm]
+    [registerForm, isStudent]
   );
 
   const handleShowPassword = useCallback(() => {
@@ -192,6 +196,54 @@ const login = () => {
                       required
                     />
                   </div>
+                  <div tw="flex justify-between">
+                    <div tw="flex items-start">
+                      <div tw="flex items-center h-5">
+                        <input
+                          id="remember"
+                          type="checkbox"
+                          onChange={() => {
+                            !isStudent
+                              ? setIsStudent(true)
+                              : setIsStudent(false);
+                          }}
+                          checked={isStudent}
+                          tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
+                        />
+                      </div>
+                      <label
+                        htmlFor="remember"
+                        tw="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                      >
+                        Centang jika anda siswa
+                      </label>
+                    </div>
+                  </div>
+                  {isStudent && (
+                    <div>
+                      <label
+                        htmlFor="password"
+                        tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                      >
+                        Kode Kelas
+                      </label>
+                      <input
+                        type="text"
+                        name="classCode"
+                        value={registerForm.classCode || ""}
+                        onChange={(e) => {
+                          if (e) e.preventDefault();
+                          setRegisterForm({
+                            ...registerForm,
+                            classCode: e.target.value,
+                          });
+                        }}
+                        tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                        placeholder="Kode Kelas"
+                        required
+                      />
+                    </div>
+                  )}
                   <div>
                     <label
                       htmlFor="password"
@@ -215,7 +267,6 @@ const login = () => {
                       required
                     />
                   </div>
-
                   <div tw="flex justify-between">
                     <div tw="flex items-start">
                       <div tw="flex items-center h-5">
@@ -225,7 +276,6 @@ const login = () => {
                           onChange={handleShowPassword}
                           checked={passwordVisibility}
                           tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
-                          required
                         />
                       </div>
                       <label
