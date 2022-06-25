@@ -336,7 +336,7 @@ const TaskComponent = () => {
       return !formData.id ? "Tambahkan tugas" : "Update tugas";
     else return "Kerjakan Tugas";
   };
-  console.log(answerTaskForm);
+  
   return (
     <LoggedArea>
       <Layout header={{ title: "Daftar Tugas" }}>

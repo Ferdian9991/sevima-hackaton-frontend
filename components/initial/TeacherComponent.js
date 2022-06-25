@@ -189,6 +189,10 @@ const TeacherComponent = () => {
                 ? handleDelete
                 : false
             }
+            onWhatsapp={({ row }) => {
+              console.log(row);
+              window.location.replace(`https://api.whatsapp.com/send?phone=${row.phoneNumber}`)
+            }}
             loading={loading}
             columns={columns}
             onEdit={

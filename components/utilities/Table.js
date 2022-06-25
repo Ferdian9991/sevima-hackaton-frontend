@@ -20,6 +20,7 @@ const Table = ({
   loading,
   onAdd,
   onEdit,
+  onWhatsapp,
   onAnswer,
   onAnswerList,
   onRemove,
@@ -132,6 +133,7 @@ const Table = ({
         if (
           onEdit ||
           onAnswer ||
+          onWhatsapp ||
           onAnswerList ||
           customUtilities ||
           onGenerate ||
@@ -149,6 +151,7 @@ const Table = ({
                   row={row}
                   onEdit={onEdit}
                   onAnswer={onAnswer}
+                  onWhatsapp={onWhatsapp}
                   onAnswerList={onAnswerList}
                   onAddParticipant={onAddParticipant}
                   onGenerate={onGenerate}
@@ -600,6 +603,21 @@ const IndeterminateOptions = (props) => {
           tw="mb-1 bg-green-500 hover:bg-green-600 w-[100px] mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
         >
           <i className="fa-brands fa-readme" tw="text-white" /> Kerjakan
+        </button>
+      ) : null}
+      {props.onWhatsapp ? (
+        <button
+          onClick={(e) => {
+            if (e) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+            props.onWhatsapp({ row: props.row.original });
+            setOptionsVisible(false);
+          }}
+          tw="mb-1 text-white bg-green-500 hover:bg-green-600 w-[100px] mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
+        >
+          <i className="fa-solid fa-phone" tw="text-white" /> Whatsapp
         </button>
       ) : null}
       {props.onAnswerList ? (

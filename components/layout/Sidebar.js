@@ -26,7 +26,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       link: "/home",
       icon: "fa fa-home",
       label: "Home",
-      roles: ["Teacher", "Student"],
+      roles: ["Teacher", "Student", "Parent"],
       isActive: linkPathname,
     },
     {
@@ -47,14 +47,21 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       link: "/teacher",
       icon: "fa-solid fa-chalkboard-user",
       label: "Daftar Guru",
-      roles: ["Teacher", "Student"],
+      roles: ["Teacher", "Student", "Parent"],
       isActive: linkPathname,
     },
     {
       link: "/student",
       icon: "fa-solid fa-user",
       label: "Daftar Siswa",
-      roles: ["Teacher", "Student"],
+      roles: ["Teacher", "Student", "Parent"],
+      isActive: linkPathname,
+    },
+    {
+      link: "/parent",
+      icon: "fa-solid fa-person",
+      label: "Daftar Wali Siswa",
+      roles: ["Teacher", "Parent"],
       isActive: linkPathname,
     },
   ];

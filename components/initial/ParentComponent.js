@@ -14,23 +14,23 @@ import {
   useNotification,
 } from "../App";
 
-const StudentComponent = () => {
+const ParentComponent = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
-  const [studentData, setTeacherData] = useState([]);
-  const [openStudentModal, setOpenStudentModal] = useState(false);
+  const [parentData, setParentData] = useState([]);
+  const [openTeacherModal, setOpenTeacherModal] = useState(false);
   const [passwordVisibility, setPasswordVisibility] = useState(false);
 
   const notification = useNotification();
   const loggedUser = useSelector((state) => state.credentials.userLogin);
 
-  const getStudent = async () => {
+  const getParent = async () => {
     try {
       setLoading(true);
-      const response = await UserService.getStudent({
+      const response = await UserService.getParent({
         token: useCookie("token"),
       });
-      response.data && setTeacherData(response.data.data);
+      response.data && setParentData(response.data.data);
       setLoading(false);
     } catch (e) {
       e.data
@@ -56,7 +56,7 @@ const StudentComponent = () => {
         showLoadingSpinner();
         const response = await UserService.register({
           ...formData,
-          role: "Student",
+          role: "Teacher",
         });
         hideLoadingSpinner();
         notification.showNotification({
@@ -64,8 +64,8 @@ const StudentComponent = () => {
           type: "success",
           dismissTimeout: 3000,
         });
-        setOpenStudentModal(false);
-        getStudent();
+        setOpenTeacherModal(false);
+        getParent();
       } catch (e) {
         hideLoadingSpinner();
         e.data
@@ -88,14 +88,14 @@ const StudentComponent = () => {
         const update = await UserService.update(formData, {
           token: useCookie("token"),
         });
-        setOpenStudentModal(false);
+        setOpenTeacherModal(false);
         hideLoadingSpinner();
         notification.showNotification({
           message: `Successfully edit ${update.data.data.username}`,
           type: "success",
           dismissTimeout: 3000,
         });
-        getStudent();
+        getParent();
       } catch (e) {
         hideLoadingSpinner();
         e.data
@@ -123,7 +123,7 @@ const StudentComponent = () => {
             }
           );
         }
-        getStudent();
+        getParent();
         notification.showNotification({
           message: `Successfully delete ${rows.length} device!`,
           type: "success",
@@ -143,12 +143,12 @@ const StudentComponent = () => {
   }, []);
 
   useEffect(() => {
-    getStudent();
+    getParent();
   }, []);
 
   useEffect(() => {
-    !openStudentModal && setFormData({});
-  }, [openStudentModal]);
+    !openTeacherModal && setFormData({});
+  }, [openTeacherModal]);
 
   const columns = useMemo(
     () => [
@@ -181,7 +181,7 @@ const StudentComponent = () => {
   );
   return (
     <LoggedArea>
-      <Layout header={{ title: "Data Siswa" }}>
+      <Layout header={{ title: "Data Wali Siswa" }}>
         <div tw="py-10">
           <Table
             onRemove={
@@ -203,18 +203,18 @@ const StudentComponent = () => {
                     setFormData({
                       ...row,
                     });
-                    setOpenStudentModal(true);
+                    setOpenTeacherModal(true);
                   }
                 : false
             }
-            data={studentData}
+            data={parentData}
             customTopButton={
               loggedUser != null && loggedUser.role === "Teacher" ? (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpenStudentModal(true);
+                    setOpenTeacherModal(true);
                   }}
                   className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
                 >
@@ -231,9 +231,9 @@ const StudentComponent = () => {
            */}
 
           <Modal
-            modalOpen={openStudentModal}
-            setModalOpen={setOpenStudentModal}
-            modalTitle={!formData.id ? "Tambahkan guru" : "Update Siswa"}
+            modalOpen={openTeacherModal}
+            setModalOpen={setOpenTeacherModal}
+            modalTitle={!formData.id ? "Tambahkan guru" : "Update Guru"}
             onSubmit={!formData.id ? handleRegister : handleUpdate}
             formElement={() => (
               <>
@@ -418,7 +418,7 @@ const StudentComponent = () => {
                   type="submit"
                   tw="w-full text-white bg-cornflower-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
-                  {!formData.id ? "Register Siswa" : "Update Siswa"}
+                  {!formData.id ? "Register Guru" : "Update Guru"}
                 </button>
               </>
             )}
@@ -429,4 +429,4 @@ const StudentComponent = () => {
   );
 };
 
-export default StudentComponent;
+export default ParentComponent;

@@ -16,7 +16,9 @@ import { isLoggedIn } from "../layout/LoggedArea";
 import Modal from "../utilities/Modal";
 
 const login = () => {
+  const [isParent, setIsParent] = useState(false);
   const [loginForm, setLoginForm] = useState({});
+  const [isTeacher, setIsTeacher] = useState(false);
   const [isStudent, setIsStudent] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
   const [registerForm, setRegisterForm] = useState({});
@@ -55,9 +57,17 @@ const login = () => {
       if (e) e.preventDefault();
       try {
         showLoadingSpinner();
+        let roles = "Parent";
+        if (isStudent) {
+          roles = "Student";
+        } else if (isTeacher) {
+          roles = "Teacher";
+        } else if (isParent) {
+          roles = "Parent";
+        }
         const response = await AuthService.register({
           ...registerForm,
-          role: isStudent ? "Student" : "Teacher",
+          role: roles,
         });
         hideLoadingSpinner();
         notification.showNotification({
@@ -77,7 +87,7 @@ const login = () => {
           : notification.handleError(e);
       }
     },
-    [registerForm, isStudent]
+    [registerForm, isStudent, isTeacher, isParent]
   );
 
   const handleShowPassword = useCallback(() => {
@@ -196,16 +206,39 @@ const login = () => {
                       required
                     />
                   </div>
-                  <div tw="flex justify-between">
+                  <select
+                    required
+                    value={registerForm.gender || ""}
+                    tw="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400
+                          focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                          focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+                    onChange={(e) =>
+                      setRegisterForm({
+                        ...registerForm,
+                        gender: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Pilih Kelamin</option>
+                    <option value="laki-laki">Laki-laki</option>
+                    <option value="perempuan">Perempuan</option>
+                  </select>
+                  <div tw="flex-col">
                     <div tw="flex items-start">
                       <div tw="flex items-center h-5">
                         <input
                           id="remember"
                           type="checkbox"
                           onChange={() => {
-                            !isStudent
-                              ? setIsStudent(true)
-                              : setIsStudent(false);
+                            if (!isStudent) {
+                              setIsStudent(true);
+                              setIsParent(false);
+                              setIsTeacher(false);
+                            } else {
+                              setIsStudent(false);
+                              setIsTeacher(false);
+                              setIsParent(true);
+                            }
                           }}
                           checked={isStudent}
                           tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
@@ -217,6 +250,64 @@ const login = () => {
                       >
                         Centang jika anda siswa
                       </label>
+                    </div>
+                    <div tw="flex-col mt-2">
+                      <div tw="flex items-start">
+                        <div tw="flex items-center h-5">
+                          <input
+                            id="remember"
+                            type="checkbox"
+                            onChange={() => {
+                              if (!isTeacher) {
+                                setIsTeacher(true);
+                                setIsStudent(false);
+                                setIsParent(false);
+                              } else {
+                                setIsTeacher(true);
+                                setIsStudent(false);
+                                setIsParent(false);
+                              }
+                            }}
+                            checked={isTeacher}
+                            tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
+                          />
+                        </div>
+                        <label
+                          htmlFor="remember"
+                          tw="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Centang jika anda guru
+                        </label>
+                      </div>
+                    </div>
+                    <div tw="flex-col mt-2">
+                      <div tw="flex items-start">
+                        <div tw="flex items-center h-5">
+                          <input
+                            id="remember"
+                            type="checkbox"
+                            onChange={() => {
+                              if (!isParent) {
+                                setIsParent(true);
+                                setIsStudent(false);
+                                setIsTeacher(false);
+                              } else {
+                                setIsParent(false);
+                                setIsTeacher(false);
+                                setIsStudent(true);
+                              }
+                            }}
+                            checked={isParent}
+                            tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
+                          />
+                        </div>
+                        <label
+                          htmlFor="remember"
+                          tw="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Centang jika wali siswa
+                        </label>
+                      </div>
                     </div>
                   </div>
                   {isStudent && (
