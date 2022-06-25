@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import tw from "twin.macro";
 import PasswordStrengthBar from "react-password-strength-bar";
+import { useSelector } from "react-redux";
 import LoggedArea from "../layout/LoggedArea";
 import Layout from "../layout/Layout";
 import Table from "../utilities/Table";
@@ -21,6 +22,7 @@ const TeacherComponent = () => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
 
   const notification = useNotification();
+  const loggedUser = useSelector((state) => state.credentials.userLogin);
 
   const getTeacher = async () => {
     try {
@@ -28,7 +30,7 @@ const TeacherComponent = () => {
       const response = await UserService.getTeacher({
         token: useCookie("token"),
       });
-      setTeacherData(response.data.data);
+      response.data && setTeacherData(response.data.data);
       setLoading(false);
     } catch (e) {
       e.data
@@ -182,27 +184,39 @@ const TeacherComponent = () => {
       <Layout header={{ title: "Data Guru" }}>
         <div tw="py-10">
           <Table
-            onRemove={handleDelete}
+            onRemove={
+              loggedUser != null && loggedUser.role === "Teacher"
+                ? handleDelete
+                : false
+            }
             loading={loading}
             columns={columns}
-            onEdit={({ row }) => {
-              setFormData({
-                ...row,
-              });
-              setOpenTeacherModal(true);
-            }}
+            onEdit={
+              loggedUser != null && loggedUser.role === "Teacher"
+                ? ({ row }) => {
+                    setFormData({
+                      ...row,
+                    });
+                    setOpenTeacherModal(true);
+                  }
+                : false
+            }
             data={teacherData}
             customTopButton={
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenTeacherModal(true);
-                }}
-                className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
-              >
-                <i className="fa fa-plus"></i>
-              </button>
+              loggedUser != null && loggedUser.role === "Teacher" ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenTeacherModal(true);
+                  }}
+                  className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
+                >
+                  <i className="fa fa-plus"></i>
+                </button>
+              ) : (
+                false
+              )
             }
           />
 

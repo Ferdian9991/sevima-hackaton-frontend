@@ -26,6 +26,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       isActive: linkPathname,
     },
     {
+      link: "/classroom",
+      icon: "fa-solid fa-graduation-cap",
+      label: "Data Kelas",
+      isActive: linkPathname,
+    },
+    {
       link: "/teacher",
       icon: "fa-solid fa-chalkboard-user",
       label: "Daftar Guru",
