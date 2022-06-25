@@ -56,7 +56,7 @@ const ParentComponent = () => {
         showLoadingSpinner();
         const response = await UserService.register({
           ...formData,
-          role: "Teacher",
+          role: "Parent",
         });
         hideLoadingSpinner();
         notification.showNotification({
