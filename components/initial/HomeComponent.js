@@ -1,7 +1,17 @@
+import React from "react";
 import tw from "twin.macro";
+import LoggedArea from "../layout/LoggedArea";
+import Layout from "../layout/Layout";
+import WelcomeBanner from "../utilities/WelcomeBanner";
 
 const HomeComponent = () => {
-  return <div tw="text-green-500 font-bold">Test Home</div>;
+  return (
+    <LoggedArea>
+      <Layout header={{ title: "Dashboard" }}>
+        <WelcomeBanner />
+      </Layout>
+    </LoggedArea>
+  );
 };
 
 export default HomeComponent;
