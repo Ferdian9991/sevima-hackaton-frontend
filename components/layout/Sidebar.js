@@ -31,6 +31,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       label: "Daftar Guru",
       isActive: linkPathname,
     },
+    {
+      link: "/student",
+      icon: "fa-solid fa-user",
+      label: "Daftar Siswa",
+      isActive: linkPathname,
+    },
   ];
 
   useEffect(() => {

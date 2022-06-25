@@ -5,6 +5,10 @@ class UserServices extends BaseService {
     this.endPoint = "/get-teacher";
     return this.get(option);
   }
+  getStudent(option) {
+    this.endPoint = "/get-student";
+    return this.get(option);
+  }
   register(payload) {
     this.endPoint = "/register";
     return this.post(payload);
