@@ -9,6 +9,10 @@ class UserServices extends BaseService {
     this.endPoint = "/register";
     return this.post(payload);
   }
+  update(payload, option) {
+    this.endPoint = "/update-user";
+    return this.post(payload, option);
+  }
 }
 
 export default new UserServices();

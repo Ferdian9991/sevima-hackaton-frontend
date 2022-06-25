@@ -62,7 +62,7 @@ const Modal = ({
                   ></path>
                 </svg>
               </button>
-              <div tw="py-6 border-t-[7px] border-b-[7px] border-cornflower-blue-500 rounded-lg">
+              <div tw="py-6 border-2 border-gray-300 rounded-lg">
                 <h3 tw="mb-4 px-6 text-xl font-medium text-gray-900 dark:text-white">
                   {modalTitle}
                 </h3>

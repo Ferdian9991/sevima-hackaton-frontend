@@ -17,7 +17,7 @@ const TeacherComponent = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({});
   const [teacherData, setTeacherData] = useState([]);
-  const [addTeacherModal, setAddTeacherModal] = useState(false);
+  const [openTeacherModal, setOpenTeacherModal] = useState(false);
   const [passwordVisibility, setPasswordVisibility] = useState(false);
 
   const notification = useNotification();
@@ -62,7 +62,37 @@ const TeacherComponent = () => {
           type: "success",
           dismissTimeout: 3000,
         });
-        setAddTeacherModal(false);
+        setOpenTeacherModal(false);
+        getTeacher();
+      } catch (e) {
+        hideLoadingSpinner();
+        e.data
+          ? notification.showNotification({
+              message: `${e.data.message}`,
+              type: "danger",
+              dismissTimeout: 3000,
+            })
+          : notification.handleError(e);
+      }
+    },
+    [formData]
+  );
+
+  const handleUpdate = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+      try {
+        showLoadingSpinner();
+        const update = await UserService.update(formData, {
+          token: useCookie("token"),
+        });
+        setOpenTeacherModal(false);
+        hideLoadingSpinner();
+        notification.showNotification({
+          message: `Successfully edit ${update.data.data.username}`,
+          type: "success",
+          dismissTimeout: 3000,
+        });
         getTeacher();
       } catch (e) {
         hideLoadingSpinner();
@@ -81,6 +111,10 @@ const TeacherComponent = () => {
   useEffect(() => {
     getTeacher();
   }, []);
+
+  useEffect(() => {
+    !openTeacherModal && setFormData({});
+  }, [openTeacherModal]);
 
   const columns = useMemo(
     () => [
@@ -123,7 +157,7 @@ const TeacherComponent = () => {
               setFormData({
                 ...row,
               });
-              setAddDeviceModalOpen(true);
+              setOpenTeacherModal(true);
             }}
             data={teacherData}
             customTopButton={
@@ -131,7 +165,7 @@ const TeacherComponent = () => {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setAddTeacherModal(true);
+                  setOpenTeacherModal(true);
                 }}
                 className="h-9 w-9 text-white bg-gray-600 rounded-full shadow focus:outline-none mr-2"
               >
@@ -143,11 +177,18 @@ const TeacherComponent = () => {
           {/**
            * CRUD Modal
            */}
+
           <Modal
-            modalOpen={addTeacherModal}
-            setModalOpen={setAddTeacherModal}
-            modalTitle={"Tambahkan guru"}
-            onSubmit={handleRegister}
+            modalOpen={openTeacherModal}
+            setModalOpen={setOpenTeacherModal}
+            modalTitle={
+              Object.keys(formData).length === 0
+                ? "Tambahkan guru"
+                : "Update Guru"
+            }
+            onSubmit={
+              Object.keys(formData).length === 0 ? handleRegister : handleUpdate
+            }
             formElement={() => (
               <>
                 <div>
@@ -271,67 +312,73 @@ const TeacherComponent = () => {
                     <option value="perempuan">Perempuan</option>
                   </select>
                 </div>
-                <div>
-                  <label
-                    htmlFor="password"
-                    tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type={passwordVisibility ? "text" : "password"}
-                    name="password"
-                    value={formData.password || ""}
-                    onChange={(e) => {
-                      if (e) e.preventDefault();
-                      setFormData({
-                        ...formData,
-                        password: e.target.value,
-                      });
-                    }}
-                    placeholder="Password"
-                    tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div tw="flex justify-between">
-                  <div tw="flex items-start">
-                    <div tw="flex items-center h-5">
+                {Object.keys(formData).length === 0 && (
+                  <>
+                    <div>
+                      <label
+                        htmlFor="password"
+                        tw="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                      >
+                        Password
+                      </label>
                       <input
-                        id="remember"
-                        type="checkbox"
-                        onChange={handleShowPassword}
-                        checked={passwordVisibility}
-                        tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
+                        type={passwordVisibility ? "text" : "password"}
+                        name="password"
+                        value={formData.password || ""}
+                        onChange={(e) => {
+                          if (e) e.preventDefault();
+                          setFormData({
+                            ...formData,
+                            password: e.target.value,
+                          });
+                        }}
+                        placeholder="Password"
+                        tw="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                        required
                       />
                     </div>
-                    <label
-                      htmlFor="remember"
-                      tw="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                    >
-                      Lihat Password
-                    </label>
-                  </div>
-                  <div tw="w-[50%]">
-                    <PasswordStrengthBar
-                      password={formData.password}
-                      shortScoreWord={"Terlalu lemah"}
-                      scoreWords={[
-                        "Sangat lemah",
-                        "Lemah",
-                        "Sedang",
-                        "Kuat",
-                        "Sangat kuat",
-                      ]}
-                    />
-                  </div>
-                </div>
+
+                    <div tw="flex justify-between">
+                      <div tw="flex items-start">
+                        <div tw="flex items-center h-5">
+                          <input
+                            id="remember"
+                            type="checkbox"
+                            onChange={handleShowPassword}
+                            checked={passwordVisibility}
+                            tw="w-4 h-4 bg-gray-50 rounded border border-gray-300 focus:ring-[3px] focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800"
+                          />
+                        </div>
+                        <label
+                          htmlFor="remember"
+                          tw="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Lihat Password
+                        </label>
+                      </div>
+                      <div tw="w-[50%]">
+                        <PasswordStrengthBar
+                          password={formData.password}
+                          shortScoreWord={"Terlalu lemah"}
+                          scoreWords={[
+                            "Sangat lemah",
+                            "Lemah",
+                            "Sedang",
+                            "Kuat",
+                            "Sangat kuat",
+                          ]}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
                 <button
                   type="submit"
                   tw="w-full text-white bg-cornflower-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                 >
-                  Buat akun baru
+                  {Object.keys(formData).length === 0
+                    ? "Register Guru"
+                    : "Update Guru"}
                 </button>
               </>
             )}
