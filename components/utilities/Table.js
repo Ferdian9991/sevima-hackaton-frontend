@@ -20,6 +20,7 @@ const Table = ({
   loading,
   onAdd,
   onEdit,
+  onAnswer,
   onRemove,
   customAddButton,
   permanentDelete,
@@ -127,7 +128,13 @@ const Table = ({
           },
           ...columns,
         ];
-        if (onEdit || customUtilities || onGenerate || onAddParticipant) {
+        if (
+          onEdit ||
+          onAnswer ||
+          customUtilities ||
+          onGenerate ||
+          onAddParticipant
+        ) {
           finalColumns.push({
             id: "options",
             Header: ({ getToggleAllRowsSelectedProps }) => <div></div>,
@@ -139,6 +146,7 @@ const Table = ({
                 <IndeterminateOptions
                   row={row}
                   onEdit={onEdit}
+                  onAnswer={onAnswer}
                   onAddParticipant={onAddParticipant}
                   onGenerate={onGenerate}
                   customUtilities={customUtilities || []}
@@ -574,6 +582,21 @@ const IndeterminateOptions = (props) => {
           tw="mb-1 bg-yellow-500 hover:bg-orange-600 mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
         >
           <i className="fa fa-pencil-alt" tw="text-white" /> Edit
+        </button>
+      ) : null}
+      {props.onAnswer ? (
+        <button
+          onClick={(e) => {
+            if (e) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+            props.onAnswer({ row: props.row.original });
+            setOptionsVisible(false);
+          }}
+          tw="mb-1 bg-green-500 hover:bg-green-600 w-[100px] mx-1 py-1 px-2 text-white focus:outline-none rounded-md"
+        >
+          <i className="fa-brands fa-readme" tw="text-white" /> Kerjakan
         </button>
       ) : null}
       {props.onGenerate ? (
