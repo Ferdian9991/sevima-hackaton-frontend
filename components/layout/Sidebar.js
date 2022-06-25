@@ -20,21 +20,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const listMenu = [
     {
-      link: "/",
+      link: "/home",
       icon: "fa fa-home",
       label: "Home",
       isActive: linkPathname,
     },
     {
-      link: "/devices",
-      icon: "fas fa-fingerprint",
-      label: "Device",
-      isActive: linkPathname,
-    },
-    {
-      link: "/contacts",
-      icon: "fa fa-address-book",
-      label: "Contact",
+      link: "/teacher",
+      icon: "fa-solid fa-chalkboard-user",
+      label: "Daftar Guru",
       isActive: linkPathname,
     },
   ];

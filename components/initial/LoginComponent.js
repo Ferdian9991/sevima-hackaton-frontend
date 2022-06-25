@@ -33,7 +33,7 @@ const login = () => {
         showLoadingSpinner();
         const response = await AuthService.login(loginForm);
         dispatch(logIn(loginForm, response.data));
-        router.replace("/");
+        router.replace("/home");
         hideLoadingSpinner();
       } catch (e) {
         hideLoadingSpinner();
@@ -422,7 +422,7 @@ const login = () => {
   };
 
   const redirectBack = () => {
-    router.replace("/");
+    router.replace("/home");
     return <React.Fragment></React.Fragment>;
   };
 
