@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import tw, { css } from "twin.macro";
 import Image from "next/image";
+import Head from "next/head";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from "react-redux";
+import appConfig from "../../app.json";
 import { logIn } from "../../redux/redux-actions/authentication";
 import {
   useNotification,
@@ -105,6 +107,9 @@ const login = () => {
   const renderLoginComponent = () => {
     return (
       <React.Fragment>
+        <Head>
+          <title>Login | {appConfig.name}</title>
+        </Head>
         <section tw="h-screen bg-white-lilac-400">
           <div tw="h-full text-gray-800">
             <Modal
@@ -416,6 +421,9 @@ const login = () => {
               </Desktop>
 
               <div tw="px-6 lg:px-10 xl:px-20 w-full md:w-5/12 sm:w-5/12  mb-12 md:mb-0">
+                <h2 tw="text-[35px] font-poppins text-cornflower-blue-600">
+                  USchool
+                </h2>
                 <div tw="flex flex-row items-center justify-center lg:justify-start">
                   <p tw="text-lg mb-0 mr-4">Masuk dengan platform</p>
                   <button
