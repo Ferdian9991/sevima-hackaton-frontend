@@ -28,8 +28,14 @@ $ yarn run build
 $ yarn run start
 ```
 
-3. env default
+4. env default
 
 ```shell
 API_URL=http://localhost:2000
+```
+5. Default Login
+
+```shell
+username : admin
+password : admin
 ```
