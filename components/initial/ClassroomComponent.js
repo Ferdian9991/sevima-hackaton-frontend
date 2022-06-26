@@ -170,7 +170,7 @@ const StudentComponent = () => {
   );
   return (
     <LoggedArea preventRole={"Student"}>
-      <Layout header={{ title: "Data Siswa" }}>
+      <Layout header={{ title: "Data Kelas" }}>
         <div tw="py-10">
           <Table
             onRemove={

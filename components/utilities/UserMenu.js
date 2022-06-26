@@ -85,7 +85,7 @@ const UserMenu = ({ userLogin }) => {
             <div tw="font-medium text-gray-800">
               {_.capitalize(userLogin.username)}
             </div>
-            <div tw="text-xs text-gray-500 italic">Administrator</div>
+            <div tw="text-xs text-gray-500 italic">{userLogin.role}</div>
           </div>
           <ul>
             <li>
